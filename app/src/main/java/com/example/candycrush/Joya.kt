@@ -2,22 +2,16 @@ package com.example.candycrush
 
 import android.graphics.Bitmap
 
-class Joya(img: Bitmap) {
-    private var img: Bitmap = img
+class Joya(num: Int, tipo: Tipo) {
     var dragging = false
-
-    fun getImg(): Bitmap {
-        return img
-    }
-
-    fun setImg(img: Bitmap) {
-        this.img = img
-    }
-
+    var desaparecer = false
+    var num = num
+    //tipo
+    var tipo = tipo
 
 
     fun equals(joya: Joya): Boolean {
-        return this.img == joya.img
+        return this.num == joya.num
     }
 
 
