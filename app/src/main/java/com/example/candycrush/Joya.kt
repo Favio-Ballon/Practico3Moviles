@@ -1,6 +1,5 @@
 package com.example.candycrush
 
-import android.graphics.Bitmap
 
 class Joya(var num: Int, //tipo
            var tipo: Tipo
