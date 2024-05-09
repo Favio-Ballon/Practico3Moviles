@@ -1,16 +1,11 @@
 package com.example.candycrush.ui
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import android.widget.Toast
-import com.example.candycrush.R
 import kotlin.math.abs
 
 class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
@@ -86,7 +81,7 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
         for (i in 1 until board.filas) {
             for (j in 0 until board.columnas) {
                 if (!board.matriz[i][j].dragging && !board.matriz[i][j].desaparecer) {
-                    var img = board.lista[board.matriz[i][j].num]
+                    val img = board.lista[board.matriz[i][j].num]
                     val centerX = (j * ancho + ancho / 2).toFloat()
                     val centerY = ((i + 3) * alto + alto / 2).toFloat()
                     val imageX = centerX - img.width / 2
@@ -99,20 +94,20 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
                     )
                 } else if (board.matriz[i][j].dragging && !board.matriz[i][j].desaparecer) {
                     // Draw the image at the new position
-                    var img = board.lista[board.matriz[i][j].num]
+                    val img = board.lista[board.matriz[i][j].num]
                     var moveX = dragX - img.width / 2
                     var moveY = dragY - img.height / 2
                     val centerX = (j * ancho + ancho / 2).toFloat()
                     val centerY = ((i + 3) * alto + alto / 2).toFloat()
                     val imageX = centerX - img.width / 2
                     val imageY = centerY - img.height / 2
-                    var movAbsX= abs(dragX - centerX)
-                    var movAbsY= abs(dragY - centerY)
+                    val movAbsX= abs(dragX - centerX)
+                    val movAbsY= abs(dragY - centerY)
                     if (movAbsX > movAbsY) {
                         if (movAbsX > img.width){
                             if(dragX > centerX){
                                 moveX = centerX + (img.width/2)
-                                var temp = model!!.matriz[i][j]
+                                val temp = model!!.matriz[i][j]
                                 model!!.matriz[i][j] = model!!.matriz[i][j+1]
                                 model!!.matriz[i][j+1] = temp
                                 if (!verificarCombo()){
@@ -122,7 +117,7 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
                             }
                             else{
                                 moveX = centerX - (img.width +(img.width/2))
-                                var temp = model!!.matriz[i][j]
+                                val temp = model!!.matriz[i][j]
                                 model!!.matriz[i][j] = model!!.matriz[i][j-1]
                                 model!!.matriz[i][j-1] = temp
                                 if (!verificarCombo()){
@@ -141,7 +136,7 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
                         if (movAbsY > img.height){
                             if(dragY > centerY){
                                 moveY = centerY + (img.height/2)
-                                var temp = model!!.matriz[i][j]
+                                val temp = model!!.matriz[i][j]
                                 model!!.matriz[i][j] = model!!.matriz[i+1][j]
                                 model!!.matriz[i+1][j] = temp
                                 if (!verificarCombo()){
@@ -151,7 +146,7 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
                             }
                             else{
                                 moveY = centerY - (img.height +(img.height/2))
-                                var temp = model!!.matriz[i][j]
+                                val temp = model!!.matriz[i][j]
                                 model!!.matriz[i][j] = model!!.matriz[i-1][j]
                                 model!!.matriz[i-1][j] = temp
                                 if (!verificarCombo()){
@@ -171,10 +166,9 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
             }
         }
     }
-    fun verificarCombo(): Boolean{
-        var lista = model!!.matriz
+    private fun verificarCombo(): Boolean{
+        val lista = model!!.matriz
         var cambio = false
-        var cordenadas = arrayOf<Pair<Int,Int>>()
         for (i in 1 until model!!.filas) {
             for (j in 0 until model!!.columnas) {
 
@@ -201,8 +195,8 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
         return cambio
     }
 
-    fun actualizarTablero(){
-        var lista = model!!.matriz
+    private fun actualizarTablero(){
+        val lista = model!!.matriz
         for (i in 0 until model!!.filas) {
             for (j in 0 until model!!.columnas) {
                 if (lista[i][j].desaparecer) {
@@ -211,7 +205,7 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
             }
         }
     }
-    fun actualizarFila(i: Int, j: Int){
+    private fun actualizarFila(i: Int, j: Int){
         if(i == 0){
             model!!.matriz[i][j] = model!!.rand()
             return
