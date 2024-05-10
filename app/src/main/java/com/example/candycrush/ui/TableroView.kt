@@ -11,6 +11,7 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.Toast
+import com.example.candycrush.Joya
 import com.example.candycrush.R
 import com.example.candycrush.Tipo
 import kotlin.math.abs
@@ -21,7 +22,8 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
         color = Color.BLACK
         strokeWidth = 8f
     }
-
+    private val ofsetY = 2
+    //((((height/(width / model!!.columnas)).toInt())- model!!.filas-1)/2).toInt()
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
@@ -44,7 +46,7 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
                 for (i in 0 until board.filas) {
                     for (j in 0 until board.columnas) {
                         val centerX = (j * ancho + ancho / 2).toFloat()
-                        val centerY = ((i + 3) * alto + alto / 2).toFloat()
+                        val centerY = ((i + ofsetY) * alto + alto / 2).toFloat()
                         if (x in (centerX - ancho / 2).toInt()..(centerX + ancho / 2).toInt() &&
                             y in (centerY - alto / 2).toInt()..(centerY + alto / 2).toInt()
                         ) {
@@ -97,7 +99,7 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
                 var moveY = dragY - img.height / 2
                 // Se calcula el centro de la imagen
                 val centerX = (j * ancho + ancho / 2).toFloat()
-                val centerY = ((i + 3) * alto + alto / 2).toFloat()
+                val centerY = ((i + ofsetY) * alto + alto / 2).toFloat()
                 // Se calcula la posicion inicial de x y y de la imagen
                 val imageX = centerX - img.width / 2
                 val imageY = centerY - img.height / 2
@@ -141,7 +143,11 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
                                 model!!.matriz[i][j] = model!!.matriz[i][j+1]
                                 model!!.matriz[i][j+1] = temp
                                 //Se verifica si se puede realizar el movimiento
-                                if (!verificarMovimiento(i,j+1)){
+                                if(temp.tipo == Tipo.CUBO){
+                                    poderCubo(model!!.matriz[i][j])
+                                    model!!.matriz[i][j+1].tipo = Tipo.NORMAL
+                                }
+                                else if (!verificarMovimiento(i,j+1)){
                                     //Si no se puede se regresan las posiciones
                                     model!!.matriz[i][j+1] = model!!.matriz[i][j]
                                     model!!.matriz[i][j] = temp
@@ -153,7 +159,11 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
                                 val temp = model!!.matriz[i][j]
                                 model!!.matriz[i][j] = model!!.matriz[i][j-1]
                                 model!!.matriz[i][j-1] = temp
-                                if (!verificarMovimiento(i,j-1)){
+                                if(temp.tipo == Tipo.CUBO){
+                                    poderCubo(model!!.matriz[i][j])
+                                    model!!.matriz[i][j-1].tipo = Tipo.NORMAL
+                                }
+                                else if (!verificarMovimiento(i,j-1)){
                                     model!!.matriz[i][j-1] = model!!.matriz[i][j]
                                     model!!.matriz[i][j] = temp
                                 }
@@ -179,7 +189,11 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
                                 val temp = model!!.matriz[i][j]
                                 model!!.matriz[i][j] = model!!.matriz[i+1][j]
                                 model!!.matriz[i+1][j] = temp
-                                if (!verificarMovimiento(i+1,j)){
+                                if(temp.tipo == Tipo.CUBO){
+                                    poderCubo(model!!.matriz[i][j])
+                                    model!!.matriz[i+1][j].tipo = Tipo.NORMAL
+                                }
+                                else if (!verificarMovimiento(i+1,j)){
                                     //Si no se puede se regresan las posiciones
                                     model!!.matriz[i+1][j] = model!!.matriz[i][j]
                                     model!!.matriz[i][j] = temp
@@ -191,7 +205,11 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
                                 val temp = model!!.matriz[i][j]
                                 model!!.matriz[i][j] = model!!.matriz[i-1][j]
                                 model!!.matriz[i-1][j] = temp
-                                if (!verificarMovimiento(i-1,j)){
+                                if(temp.tipo == Tipo.CUBO){
+                                    poderCubo(model!!.matriz[i][j])
+                                    model!!.matriz[i-1][j].tipo = Tipo.NORMAL
+                                }
+                                else if (!verificarMovimiento(i-1,j)){
                                     model!!.matriz[i-1][j] = model!!.matriz[i][j]
                                     model!!.matriz[i][j] = temp
                                 }
@@ -441,6 +459,17 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
         return false
     }
 
+    private fun poderCubo(joya: Joya){
+        var lista = model!!.matriz
+        for (i in 0 until model!!.filas) {
+            for (j in 0 until model!!.columnas) {
+                if (lista[i][j].equals(joya) && !lista[i][j].desaparecer) {
+                    lista[i][j].desaparecer = true
+                }
+            }
+        }
+        actualizarTablero()
+    }
 
     private fun actualizarTablero(){
         val lista = model!!.matriz
