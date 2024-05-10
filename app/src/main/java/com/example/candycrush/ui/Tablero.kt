@@ -8,7 +8,7 @@ import com.example.candycrush.R
 import com.example.candycrush.Tipo
 
 class Tablero(context: Context?, width: Int) {
-    var filas = 7
+    var filas = 9
     var columnas = 8
     var ancho = width / columnas
     var foolimg = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(context?.resources, R.drawable.fool_symbol), ancho, ancho, true)
@@ -21,6 +21,8 @@ class Tablero(context: Context?, width: Int) {
 
     // matriz llena de números del 1 al 6
     var matriz: Array<Array<Joya>> = arrayOf(
+        /*
+        arrayOf(rand(), rand(), rand(), rand(), rand(), rand(), rand(), rand()),
         arrayOf(rand(), rand(), rand(), rand(), rand(), rand(), rand(), rand()),
         arrayOf(rand(), rand(), rand(), rand(), rand(), rand(), rand(), rand()),
         arrayOf(rand(), rand(), rand(), rand(), rand(), rand(), rand(), rand()),
@@ -29,10 +31,26 @@ class Tablero(context: Context?, width: Int) {
         arrayOf(rand(), rand(), rand(), rand(), rand(), rand(), rand(), rand()),
         arrayOf(rand(), rand(), rand(), rand(), rand(), rand(), rand(), rand()),
         arrayOf(rand(), rand(), rand(), rand(), rand(), rand(), rand(), rand())
+         */
+        arrayOf(crear(1), crear(2), crear(3), crear(2), crear(5), crear(6), crear(1), crear(2)),
+        arrayOf(crear(2), crear(4), crear(4), crear(1), crear(4), crear(4), crear(2), crear(3)),
+        arrayOf(crear(3), crear(4), crear(5), crear(4), crear(1), crear(2), crear(3), crear(4)),
+        arrayOf(crear(4), crear(5), crear(6), crear(3), crear(2), crear(3), crear(4), crear(5)),
+        arrayOf(crear(5), crear(6), crear(1), crear(2), crear(3), crear(4), crear(5), crear(6)),
+        arrayOf(crear(6), crear(1), crear(5), crear(3), crear(4), crear(5), crear(6), crear(1)),
+        arrayOf(crear(1), crear(5), crear(3), crear(5), crear(5), crear(6), crear(1), crear(2)),
+        arrayOf(crear(2), crear(1), crear(5), crear(4), crear(3), crear(1), crear(2), crear(3)),
+        arrayOf(crear(3), crear(4), crear(5), crear(4), crear(1), crear(2), crear(3), crear(4))
     )
 
     fun rand(): Joya {
         val randomJoya = (0..5).random()
+        val newJoya = Joya(randomJoya, Tipo.NORMAL)
+        return newJoya
+    }
+
+    fun crear(i:Int): Joya{
+        val randomJoya = i-1
         val newJoya = Joya(randomJoya, Tipo.NORMAL)
         return newJoya
     }

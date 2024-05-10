@@ -12,7 +12,4 @@ class Joya(var num: Int, //tipo
         return this.num == joya.num
     }
 
-
-
-
 }
