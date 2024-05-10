@@ -218,6 +218,7 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
 
                 if(verificarMovimiento(i,j)) {
                     actualizarTablero()
+                    cambio = true
                     continue
                 }
             }
