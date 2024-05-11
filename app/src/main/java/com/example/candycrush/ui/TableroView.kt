@@ -15,6 +15,7 @@ import com.example.candycrush.Joya
 import com.example.candycrush.R
 import com.example.candycrush.Tipo
 import kotlin.math.abs
+import kotlin.time.times
 
 class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
     private var model: Tablero? = null
@@ -28,6 +29,7 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
         model = Tablero(context, w)
+        inicializarJoyasTamano()
         verificarCombo()
     }
     private var dragging = false
@@ -86,6 +88,12 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+        inicializarJoyasTamano()
+        if(animacion()){
+            invalidate()
+            dibujar(canvas)
+            return
+        }
         verificarCombo()
         val board = model
         val ancho = width / board!!.columnas
@@ -122,8 +130,8 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
                 if (!board.matriz[i][j].dragging && !board.matriz[i][j].desaparecer) {
                     canvas.drawBitmap(
                         img,
-                        imageX,
-                        imageY,
+                        board.matriz[i][j].x.toFloat(),
+                        board.matriz[i][j].y.toFloat(),
                         paint
                     )
                     // Si se esta moviendo se dibuja la imagen en la nueva posición
@@ -140,32 +148,28 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
                                 moveX = centerX + (img.width/2)
                                 //Se intercambian las posiciones de las joyas
                                 val temp = model!!.matriz[i][j]
-                                model!!.matriz[i][j] = model!!.matriz[i][j+1]
-                                model!!.matriz[i][j+1] = temp
+                                intercambiar(i,j,i,j+1)
                                 //Se verifica si se puede realizar el movimiento
                                 if(temp.tipo == Tipo.CUBO){
                                     poderCubo(model!!.matriz[i][j])
                                     model!!.matriz[i][j+1].tipo = Tipo.NORMAL
                                 }
-                                else if (!verificarMovimiento(i,j+1)){
+                                else if (!verificarMovimiento(i,j+1) && !verificarMovimiento(i,j)){
                                     //Si no se puede se regresan las posiciones
-                                    model!!.matriz[i][j+1] = model!!.matriz[i][j]
-                                    model!!.matriz[i][j] = temp
+                                    intercambiar(i,j,i,j+1)
                                 }
                             }
                             //Izquierda
                             else{
                                 moveX = centerX - (img.width +(img.width/2))
                                 val temp = model!!.matriz[i][j]
-                                model!!.matriz[i][j] = model!!.matriz[i][j-1]
-                                model!!.matriz[i][j-1] = temp
+                                intercambiar(i,j,i,j-1)
                                 if(temp.tipo == Tipo.CUBO){
                                     poderCubo(model!!.matriz[i][j])
                                     model!!.matriz[i][j-1].tipo = Tipo.NORMAL
                                 }
-                                else if (!verificarMovimiento(i,j-1)){
-                                    model!!.matriz[i][j-1] = model!!.matriz[i][j]
-                                    model!!.matriz[i][j] = temp
+                                else if (!verificarMovimiento(i,j-1) && !verificarMovimiento(i,j)){
+                                    intercambiar(i,j,i,j-1)
                                 }
                             }
                         }
@@ -173,7 +177,7 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
                         canvas.drawBitmap(
                             img,
                             moveX,
-                            imageY,
+                            model!!.matriz[i][j].y.toFloat(),
                             paint
                         )
                         //Vertical
@@ -187,38 +191,34 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
                                 moveY = centerY + (img.height/2)
                                 //Se intercambian las posiciones de las joyas
                                 val temp = model!!.matriz[i][j]
-                                model!!.matriz[i][j] = model!!.matriz[i+1][j]
-                                model!!.matriz[i+1][j] = temp
+                                intercambiar(i,j,i+1,j)
                                 if(temp.tipo == Tipo.CUBO){
                                     poderCubo(model!!.matriz[i][j])
                                     model!!.matriz[i+1][j].tipo = Tipo.NORMAL
                                 }
-                                else if (!verificarMovimiento(i+1,j)){
+                                else if (!verificarMovimiento(i+1,j) && !verificarMovimiento(i,j)){
                                     //Si no se puede se regresan las posiciones
-                                    model!!.matriz[i+1][j] = model!!.matriz[i][j]
-                                    model!!.matriz[i][j] = temp
+                                    intercambiar(i,j,i+1,j)
                                 }
                             }
                             //Arriba
                             else{
                                 moveY = centerY - (img.height +(img.height/2))
                                 val temp = model!!.matriz[i][j]
-                                model!!.matriz[i][j] = model!!.matriz[i-1][j]
-                                model!!.matriz[i-1][j] = temp
+                                intercambiar(i,j,i-1,j)
                                 if(temp.tipo == Tipo.CUBO){
                                     poderCubo(model!!.matriz[i][j])
                                     model!!.matriz[i-1][j].tipo = Tipo.NORMAL
                                 }
-                                else if (!verificarMovimiento(i-1,j)){
-                                    model!!.matriz[i-1][j] = model!!.matriz[i][j]
-                                    model!!.matriz[i][j] = temp
+                                else if (!verificarMovimiento(i-1,j) && !verificarMovimiento(i,j)){
+                                    intercambiar(i,j,i-1,j)
                                 }
                             }
                         }
                         //Se dibuja la imagen en la nueva posición
                         canvas.drawBitmap(
                             img,
-                            imageX,
+                            model!!.matriz[i][j].x.toFloat(),
                             moveY,
                             paint
                         )
@@ -227,24 +227,88 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
                 }
             }
         }
+
+    }
+
+    private fun dibujar(canvas: Canvas) {
+        val board = model
+        val ancho = width / board!!.columnas
+
+        for (i in 1 until board.filas) {
+            for (j in 0 until board.columnas) {
+                var img = board.lista[board.matriz[i][j].num]
+                // Se verifica el tipo de joya para cambiar la imagen
+                if (board.matriz[i][j].tipo == Tipo.FUEGO) {
+                    img = crearFuego(img)
+                }
+                if (board.matriz[i][j].tipo == Tipo.RAYO) {
+                    img = crearRayo(img)
+                }
+                if (board.matriz[i][j].tipo == Tipo.CUBO) {
+                    img = crearCubo(ancho)
+                }
+
+                // Si no se esta moviendo se dibuja la imagen en su posición
+                if (!board.matriz[i][j].dragging) {
+                    if(board.matriz[i][j].y > (ofsetY) * img.height){
+                        canvas.drawBitmap(
+                            img,
+                            board.matriz[i][j].x.toFloat(),
+                            board.matriz[i][j].y.toFloat(),
+                            paint
+                        )
+
+                    }
+                }
+            }
+        }
+    }
+
+    private fun animacion(): Boolean {
+        val board = model
+        val alto = width / board!!.columnas
+        val lista = model!!.matriz
+        var bandera = false
+        for (i in 0 until model!!.filas) {
+            for (j in 0 until model!!.columnas) {
+                var img = board.lista[board.matriz[i][j].num]
+                val centerY = ((i + ofsetY) * alto + alto / 2).toFloat()
+                val imageY = centerY - img.height / 2
+                if(lista[i][j].animacion && !lista[i][j].desaparecer){
+                    if(lista[i][j].y < imageY){
+                        lista[i][j].y += 3
+                        bandera = true
+                    } else{
+                        lista[i][j].animacion = false
+                    }
+                }
+            }
+        }
+        return bandera
+    }
+    private fun intercambiar(i:Int,j:Int, i2:Int,j2:Int){
+        val temp = model!!.matriz[i][j]
+        model!!.matriz[i][j] = model!!.matriz[i2][j2]
+        model!!.matriz[i2][j2] = temp
     }
     private fun verificarCombo(): Boolean{
         val lista = model!!.matriz
         var cambio = false
         for (i in 1 until model!!.filas) {
             for (j in 0 until model!!.columnas) {
-
                 if(verificarMovimiento(i,j)) {
-                    actualizarTablero()
                     cambio = true
                     continue
                 }
             }
         }
+        actualizarTablero()
         return cambio
     }
 
     private fun verificarMovimiento(i:Int,j:Int): Boolean {
+
+
         if(verificarRayo(i,j)) {
             actualizarTablero()
             return true
@@ -284,8 +348,10 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
             }
         }
         if (iMenor + 2 < model!!.filas && jMenor + 2 < model!!.columnas) {
-            if (lista[i][jMenor].equals(lista[i][jMenor + 1]) && lista[i][jMenor].equals(lista[i][jMenor + 2])){
-                if (lista[iMenor][j].equals(lista[iMenor + 1][j]) && lista[iMenor][j].equals(lista[iMenor + 2][j])){
+            if (lista[i][jMenor].equals(lista[i][jMenor + 1]) && lista[i][jMenor].equals(lista[i][jMenor + 2])
+                && !model!!.matriz[i][jMenor].desaparecer && !model!!.matriz[i][jMenor+1].desaparecer && !model!!.matriz[i][jMenor+2].desaparecer){
+                if (lista[iMenor][j].equals(lista[iMenor + 1][j]) && lista[iMenor][j].equals(lista[iMenor + 2][j])
+                    && !model!!.matriz[iMenor][j].desaparecer && !model!!.matriz[iMenor+1][j].desaparecer && !model!!.matriz[iMenor+2][j].desaparecer){
                     for (y in iMenor..iMenor + 2) {
                         if (y == i) {
                             //Se cambia la joya a tipo fuego
@@ -432,6 +498,14 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
             if (iMenor + 2 < model!!.filas) {
                 if ((lista[iMenor][j].equals(lista[iMenor + 1][j]) && lista[iMenor][j].equals(lista[iMenor + 2][j])) && !lista[iMenor][j].desaparecer) {
                     for (y in iMenor..iMenor + 2) {
+                        if(model!!.matriz[y][j].tipo == Tipo.RAYO){
+                            poderRayo(y,j)
+                            return true
+                        }
+                        if(model!!.matriz[y][j].tipo == Tipo.FUEGO){
+                            poderFuego(y,j)
+                            return true
+                        }
                         //Se desaparecen las joyas
                         model!!.matriz[y][j].desaparecer = true
                     }
@@ -451,6 +525,14 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
             if (jMenor + 2 < model!!.columnas) {
                 if ((lista[i][jMenor].equals(lista[i][jMenor + 1]) && lista[i][jMenor].equals(lista[i][jMenor + 2])) && !lista[i][jMenor].desaparecer) {
                     for (x in jMenor..jMenor + 2) {
+                        if(model!!.matriz[i][x].tipo == Tipo.RAYO){
+                            poderRayo(i,x)
+                            return true
+                        }
+                        if(model!!.matriz[i][x].tipo == Tipo.FUEGO){
+                            poderFuego(i,x)
+                            return true
+                        }
                         model!!.matriz[i][x].desaparecer = true
                     }
                     return true
@@ -471,54 +553,115 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
         actualizarTablero()
     }
 
-    private fun actualizarTablero(){
+    private fun poderRayo(i:Int,j: Int){
         val lista = model!!.matriz
-        for (i in 0 until model!!.filas) {
-            for (j in 0 until model!!.columnas) {
-                if (lista[i][j].desaparecer) {
-                    actualizarFila(i,j)
-                }
+        //Se eliminan las joyas en la misma fila
+        for (y in 1 until model!!.filas) {
+            model!!.matriz[y][j].desaparecer = true
+        }
+        //Se eliminan las joyas en la misma columna
+        for (x in 0 until model!!.columnas) {
+            model!!.matriz[i][x].desaparecer = true
+
+        }
+
+    }
+
+    private fun poderFuego(i:Int,j: Int){
+        val lista = model!!.matriz
+        //linea de arriba
+        if (i>1) {
+            model!!.matriz[i-1][j].desaparecer = true
+            if(j>0){
+                model!!.matriz[i-1][j-1].desaparecer = true
+            }
+            if(j<model!!.columnas-1){
+                model!!.matriz[i-1][j+1].desaparecer = true
+            }
+        }
+        //linea del medio
+        model!!.matriz[i][j].desaparecer = true
+        if(j>0){
+            model!!.matriz[i][j-1].desaparecer = true
+        }
+        if(j<model!!.columnas-1){
+            model!!.matriz[i][j+1].desaparecer = true
+        }
+        //linea de abajo
+        if(i<model!!.filas-1){
+            model!!.matriz[i+1][j].desaparecer = true
+            if(j>0){
+                model!!.matriz[i+1][j-1].desaparecer = true
+            }
+            if(j<model!!.columnas-1){
+                model!!.matriz[i+1][j+1].desaparecer = true
             }
         }
     }
-    private fun actualizarFila(i: Int, j: Int){
+
+    private fun actualizarTablero(){
+        val lista = model!!.matriz
+        for (j in 0 until model!!.columnas) {
+            val off = findDesaparecer(j)
+            for (i in 1 until model!!.filas) {
+                if (lista[i][j].desaparecer) {
+                    actualizarFila(i,j,off)
+                }
+            }
+        }
+        inicializarJoyasTamano()
+        invalidate()
+    }
+    private fun actualizarFila(i: Int, j: Int, off: Int){
+        val board = model
+        val ancho = width / board!!.columnas
+        val alto = width / board.columnas
         if(i == 0){
             model!!.matriz[i][j] = model!!.rand()
             return
         }
         model!!.matriz[i][j] = model!!.matriz[i-1][j]
-        actualizarFila(i-1,j)
+        model!!.matriz[i][j].x = j * ancho
+        model!!.matriz[i][j].y = ((i + ofsetY) * alto) - (off * alto)
+        model!!.matriz[i][j].animacion = true
+        actualizarFila(i-1,j, off)
+    }
+
+    private fun findDesaparecer(j:Int): Int{
+        var contar = 0
+        for (i in 1 until model!!.filas) {
+            if(model!!.matriz[i][j].desaparecer){
+                contar++
+            }
+        }
+        return contar
     }
 
     private fun crearFuego(originalBitmap: Bitmap): Bitmap {
-        // Create a mutable bitmap with the same size as the original
+
         val fuego = Bitmap.createBitmap(originalBitmap.width, originalBitmap.height, originalBitmap.config)
 
-        // Create a canvas to draw on the new bitmap
+
         val canvas = Canvas(fuego)
 
-        // Draw a red rectangle on the entire canvas
-        val paint = Paint().apply { color = Color.RED }
-        canvas.drawRect(0f, 0f, canvas.width.toFloat(), canvas.height.toFloat(), paint)
 
-        // Draw the original bitmap on top of the red rectangle
+        val paint = Paint().apply { color = Color.RED }
+
+        canvas.drawCircle(canvas.width.toFloat()/2, canvas.height.toFloat()/2, canvas.width.toFloat()/2, paint)
+
         canvas.drawBitmap(originalBitmap, 0f, 0f, null)
 
         return fuego
     }
 
     private fun crearRayo(originalBitmap: Bitmap): Bitmap {
-        // Create a mutable bitmap with the same size as the original
         val rayo = Bitmap.createBitmap(originalBitmap.width, originalBitmap.height, originalBitmap.config)
 
-        // Create a canvas to draw on the new bitmap
         val canvas = Canvas(rayo)
 
-        // Draw a red rectangle on the entire canvas
         val paint = Paint().apply { color = Color.BLUE }
-        canvas.drawRect(0f, 0f, canvas.width.toFloat(), canvas.height.toFloat(), paint)
+        canvas.drawCircle(canvas.width.toFloat()/2, canvas.height.toFloat()/2, canvas.width.toFloat()/2, paint)
 
-        // Draw the original bitmap on top of the red rectangle
         canvas.drawBitmap(originalBitmap, 0f, 0f, null)
 
         return rayo
@@ -527,5 +670,19 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
     private fun crearCubo(ancho: Int): Bitmap {
         val cubo = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(context?.resources, R.drawable.black_emperor_symbol), ancho, ancho, true)
         return cubo
+    }
+
+    private fun inicializarJoyasTamano(){
+        val board = model
+        val ancho = width / board!!.columnas
+        val alto = width / board.columnas
+        for (i in 1 until board.filas) {
+            for (j in 0 until board.columnas) {
+                if (!board.matriz[i][j].animacion) {
+                    board.matriz[i][j].x = j * ancho
+                    board.matriz[i][j].y = (i + ofsetY) * alto
+                }
+            }
+        }
     }
 }

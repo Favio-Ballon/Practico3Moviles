@@ -36,7 +36,7 @@ class Tablero(context: Context?, width: Int) {
         arrayOf(crear(2), crear(4), crear(4), crear(1), crear(4), crear(4), crear(2), crear(3)),
         arrayOf(crear(3), crear(4), crear(5), crear(4), crear(1), crear(2), crear(3), crear(4)),
         arrayOf(crear(4), crear(5), crear(6), crear(3), crear(2), crear(3), crear(4), crear(5)),
-        arrayOf(crear(5), crear(6), crear(1), crear(2), crear(3), crear(4), crear(5), crear(6)),
+        arrayOf(crear(5), crear(5), crear(1), crear(5), crear(3), crear(4), crear(5), crear(6)),
         arrayOf(crear(6), crear(1), crear(5), crear(3), crear(4), crear(5), crear(6), crear(1)),
         arrayOf(crear(1), crear(5), crear(3), crear(5), crear(5), crear(6), crear(1), crear(2)),
         arrayOf(crear(2), crear(1), crear(5), crear(4), crear(3), crear(1), crear(2), crear(3)),
