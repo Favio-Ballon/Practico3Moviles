@@ -7,15 +7,13 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
-import android.widget.Toast
 import com.example.candycrush.Joya
 import com.example.candycrush.R
 import com.example.candycrush.Tipo
 import kotlin.math.abs
-import kotlin.time.times
+
 
 class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
     private var model: Tablero? = null
@@ -108,9 +106,6 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
                 // Se calcula el centro de la imagen
                 val centerX = (j * ancho + ancho / 2).toFloat()
                 val centerY = ((i + ofsetY) * alto + alto / 2).toFloat()
-                // Se calcula la posicion inicial de x y y de la imagen
-                val imageX = centerX - img.width / 2
-                val imageY = centerY - img.height / 2
                 // Se calcula el movimiento absoluto en x y y
                 val movAbsX= abs(dragX - centerX)
                 val movAbsY= abs(dragY - centerY)
@@ -295,7 +290,7 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
         var bandera = false
         for (i in 0 until model!!.filas) {
             for (j in 0 until model!!.columnas) {
-                var img = board.lista[board.matriz[i][j].num]
+                val img = board.lista[board.matriz[i][j].num]
                 val centerY = ((i + ofsetY) * alto + alto / 2).toFloat()
                 val imageY = centerY - img.height / 2
                 if(lista[i][j].animacion && !lista[i][j].desaparecer){
@@ -316,7 +311,6 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
         model!!.matriz[i2][j2] = temp
     }
     private fun verificarCombo(): Boolean{
-        val lista = model!!.matriz
         var cambio = false
         for (i in 1 until model!!.filas) {
             for (j in 0 until model!!.columnas) {
@@ -566,7 +560,7 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
     }
 
     private fun poderCubo(joya: Joya){
-        var lista = model!!.matriz
+        val lista = model!!.matriz
         for (i in 0 until model!!.filas) {
             for (j in 0 until model!!.columnas) {
                 if (lista[i][j].equals(joya) && !lista[i][j].desaparecer) {
@@ -578,7 +572,7 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
     }
 
     private fun poderRayo(i:Int,j: Int){
-        val lista = model!!.matriz
+
         //Se eliminan las joyas en la misma fila
         for (y in 1 until model!!.filas) {
             model!!.matriz[y][j].desaparecer = true
@@ -592,7 +586,6 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
     }
 
     private fun poderFuego(i:Int,j: Int){
-        val lista = model!!.matriz
         //linea de arriba
         if (i>1) {
             model!!.matriz[i-1][j].desaparecer = true
@@ -692,8 +685,12 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
     }
 
     private fun crearCubo(ancho: Int): Bitmap {
-        val cubo = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(context?.resources, R.drawable.black_emperor_symbol), ancho, ancho, true)
-        return cubo
+        return Bitmap.createScaledBitmap(
+            BitmapFactory.decodeResource(
+                context?.resources,
+                R.drawable.black_emperor_symbol
+            ), ancho, ancho, true
+        )
     }
 
     private fun inicializarJoyasTamano(){
