@@ -127,18 +127,26 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
                 }
 
                 // Si no se esta moviendo se dibuja la imagen en su posición
-                if (!board.matriz[i][j].dragging && !board.matriz[i][j].desaparecer) {
-                    canvas.drawBitmap(
-                        img,
-                        board.matriz[i][j].x.toFloat(),
-                        board.matriz[i][j].y.toFloat(),
-                        paint
-                    )
                     // Si se esta moviendo se dibuja la imagen en la nueva posición
-                } else if (board.matriz[i][j].dragging && !board.matriz[i][j].desaparecer) {
+                if (board.matriz[i][j].dragging && !board.matriz[i][j].desaparecer) {
                     //Se verifica si el movimiento es horizontal o vertical
                     //Vertical
                     if (movAbsX > movAbsY) {
+                        //Se calcula la diferencia entre el centro de la imagen y la posición del dedo,
+                        val dif = centerX - dragX
+                        if(dif < 0){
+                            if (abs(dif) < img.width) {
+                                model!!.matriz[i][j + 1].x -= abs(dif.toInt())
+                            }else{
+                                model!!.matriz[i][j + 1].x -= img.width
+                            }
+                        }else {
+                            if (abs(dif) < img.width) {
+                                model!!.matriz[i][j - 1].x += abs(dif.toInt())
+                            }else{
+                                model!!.matriz[i][j - 1].x += img.width
+                            }
+                        }
                         //Se verifica si el movimiento supera el tamaño de la imagen para intercambiar las posiciones
                         if (movAbsX > img.width){
                             //Se verifica si el movimiento es hacia la derecha o izquierda
@@ -182,6 +190,22 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
                         )
                         //Vertical
                     }else{
+
+                        val dif = centerY - dragY
+                        if(dif < 0){
+                            if (abs(dif) < img.height) {
+                                model!!.matriz[i+1][j].y -= abs(dif.toInt())
+                            }else{
+                                model!!.matriz[i+1][j].y -= img.width
+                            }
+                        }else {
+                            if (abs(dif) < img.height) {
+                                model!!.matriz[i-1][j].y += abs(dif.toInt())
+                            }else{
+                                model!!.matriz[i-1][j].y += img.width
+                            }
+                        }
+
                         //Se verifica si el movimiento supera el tamaño de la imagen para intercambiar las posiciones
                         if (movAbsY > img.height){
                             //Se verifica si el movimiento es hacia abajo o arriba
@@ -227,7 +251,7 @@ class TableroView(context: Context?, attrs: AttributeSet?) : View(context, attrs
                 }
             }
         }
-
+        dibujar(canvas)
     }
 
     private fun dibujar(canvas: Canvas) {
